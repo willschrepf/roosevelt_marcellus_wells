@@ -1,0 +1,224 @@
+---
+title: "roosevelt_marcellus_wells"
+author: "Will Schrepferman"
+date: "6/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(janitor)
+library(gt)
+```
+
+# Introduction
+
+All data from: http://www.depreportingservices.state.pa.us/ReportServer/Pages/ReportViewer.aspx?%2fOil_Gas%2fOil_Gas_Well_Production
+
+I downloaded data for unconventional (shale) wells in the region at the beginning of every year from 2015 through 2020 (the data was formatted differently in previous years and wouldn't be comparable), and filtered for our relevant counties: Allegheny, Armstrong, Beaver, Butler, Cambria, Fayette, Greene, Indiana, Lawrence, Mercer, Somerset, Washington, and Westmoreland.
+
+```{r read_data, include = FALSE}
+raw_data <- read.csv("oil_gas_wells.csv") %>%
+  clean_names()
+
+
+# filter for relevant data
+
+clean_data <- raw_data %>%
+  mutate(year = as.numeric(paste("20", substring(period_id, 1, 2), sep = ""))) %>%
+  mutate(permit_num = as.character(i_well_permit_num)) %>%
+  mutate(farm_name_well = as.character(farm_name_well_num)) %>%
+  mutate(spud = as.Date(spud_date)) %>%
+  mutate(gas_prod_monthly_quantity = as.numeric(gas_quantity)) %>%
+  mutate(operating_firm = as.character(operator)) %>%
+  mutate(county = as.character(well_county)) %>%
+  mutate(municipality = as.character(well_municipality)) %>%
+  mutate(latitude = well_latitude) %>%
+  mutate(longitude = well_longitude) %>%
+  select(year, permit_num, farm_name_well, spud, gas_prod_monthly_quantity, operating_firm, county, municipality, latitude, longitude)
+
+
+# Counties: Allegheny,Armstrong,Beaver,Butler,Cambria,Fayette,Greene,Indiana,Lawrence,Mercer,Somerset,Washington,and Westmoreland
+# from Summer Research Memo
+
+
+counties_data <- clean_data %>%
+  filter(county == "ALLEGHENY" | county == "ARMSTRONG" | county == "BEAVER" | county == "BUTLER" | county == "CAMBRIA" | county == "FAYETTE" | 
+         county == "GREENE" | county == "INDIANA" | county == "LAWRENCE" | county == "MERCER" | county == "SOMERSET" | county == "WASHINGTON" | 
+         county == "WESTMORELAND")
+
+
+```
+
+
+Since 2015, the total number of wells in the Marcellus Shale within these specified counties has been increasing, but that increase appears to be slowing.
+
+```{r graph1}
+counties_data %>%
+  group_by(year) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = year, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Shale Wells in the Marcellus Region since 2015", subtitle = "Relevant Counties")
+```
+
+
+
+### Here are the top 10 firms in every given year:
+
+```{r graph2}
+graph_2015 <- counties_data %>%
+  filter(year == 2015) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2015 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+graph_2016 <- counties_data %>%
+  filter(year == 2016) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2016 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+graph_2017 <- counties_data %>%
+  filter(year == 2017) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2017 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+graph_2018 <- counties_data %>%
+  filter(year == 2018) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2018 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+graph_2019 <- counties_data %>%
+  filter(year == 2019) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2019 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+graph_2020 <- counties_data %>%
+  filter(year == 2020) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  head(10) %>%
+  ggplot(aes(x = reorder(operating_firm, -count), y = count)) +
+  geom_text(aes(label=count), vjust=-0.15, size=3.5) +
+  theme(axis.text.x = element_text(angle = 90, size = 7.5, hjust = 0.5)) +
+  geom_bar(stat = "identity") + 
+  ylim(0, 1400) +
+  labs(title = "Wells in 2020 (Top 10 Firms)", x = "Firm", y = "No. of Wells")
+
+
+graph_2015
+graph_2016
+graph_2017
+graph_2018
+graph_2019
+graph_2020
+
+```
+
+
+
+### And here is the data including every firm and well per year:
+
+```{r tables}
+plot_2015 <- counties_data %>%
+  filter(year == 2015) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2015")
+
+plot_2016 <- counties_data %>%
+  filter(year == 2016) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2016")
+
+plot_2017 <- counties_data %>%
+  filter(year == 2017) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2017")
+
+plot_2018 <- counties_data %>%
+  filter(year == 2018) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2018")
+
+plot_2019 <- counties_data %>%
+  filter(year == 2019) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2019")
+
+plot_2020 <- counties_data %>%
+  filter(year == 2020) %>%
+  group_by(operating_firm) %>%
+  summarize(count = n()) %>%
+  arrange(-count) %>%
+  gt() %>%
+  tab_header(title = "Wells in 2020")
+
+plot_2015
+plot_2016
+plot_2017
+plot_2018
+plot_2019
+plot_2020
+```
+
+
+
+
